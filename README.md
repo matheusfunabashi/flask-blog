@@ -47,7 +47,7 @@ cd flask-blog
 pip install -r requirements.txt
 ```
 
-Create a .env file in the root folder with your credentials:
+# 🔑 Create a .env file in the root folder with your credentials:
 
 FLASK_SECRET_KEY=your_secret_key
 MAIL_USERNAME=your_email@gmail.com
@@ -56,6 +56,6 @@ DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 DB_NAME=login_demo
 
-Start the app:
+# 🏁 Start the app:
 
 python app.py
