@@ -12,7 +12,7 @@ A beginner-friendly blog platform built with **Flask**, **MySQL**, and **Bootstr
 
 ## 🚀 Live Demo
 
-🖥️ Deployed at: _[Add your Render/Fly.io link here once deployed]_
+🖥️ Deployed at: _https://flask-blog-879o.onrender.com_
 
 ---
 
