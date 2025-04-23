@@ -59,3 +59,7 @@ DB_NAME=login_demo
 # 🏁 Start the app:
 
 python app.py
+
+#👨🏾‍💻 Author
+
+Matheus Funabashi 💙
