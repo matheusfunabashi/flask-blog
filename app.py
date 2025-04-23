@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session, g, flash
+from flask import Flask, request, render_template, redirect, url_for, session, g, flash, jsonify
 import sqlite3
 from email_validator import validate_email, EmailNotValidError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -186,10 +186,11 @@ def search_users():
         sql = "SELECT id, username FROM blog_users WHERE username LIKE ?"
         cursor.execute(sql, (f'%{query}%',))
         results = cursor.fetchall()
+        users = [{'id': row['id'], 'username': row['username']} for row in results]
     finally:
         cursor.close()
 
-    return {'users': results}
+    return jsonify(users=users)
 
 @app.route('/user/<username>')
 def user_profile(username):
