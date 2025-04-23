@@ -1,5 +1,5 @@
-from flask import Flask, request, render_template, redirect, url_for, session
-import mysql.connector
+from flask import Flask, request, render_template, redirect, url_for, session, g
+import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
@@ -8,12 +8,19 @@ load_dotenv()
 
 app = Flask(__name__)
 
-db = mysql.connector.connect(
-    host="localhost",
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME")
-)
+DATABASE = 'blog.db'
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row  # So you can access columns by name
+    return g.db
+
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
@@ -35,12 +42,12 @@ def login():
         email = request.form['email']
         password = request.form['passw']
 
-        cursor = db.cursor(dictionary=True)
+        db = get_db()
+        cursor = db.cursor()
         try:
-            sql = "SELECT * FROM blog_users WHERE email = %s"
+            sql = "SELECT * FROM blog_users WHERE email = ?"
             cursor.execute(sql, (email,))
             result = cursor.fetchone()
-            cursor.fetchall()
         finally:
             cursor.close()
 
@@ -63,9 +70,10 @@ def signup():
 
         hashed_password = generate_password_hash(password)
 
+        db = get_db()
         cursor = db.cursor()
         try:
-            sql = "INSERT INTO blog_users (username, password, email) VALUES (%s, %s, %s)"
+            sql = "INSERT INTO blog_users (username, password, email) VALUES (?, ?, ?)"
             cursor.execute(sql, (uname, hashed_password, email)) 
             db.commit()
             msg = Message("Welcome to UniLife 🎉",
@@ -85,7 +93,8 @@ def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
     
-    cursor = db.cursor(dictionary=True)
+    db = get_db()
+    cursor = db.cursor()
     try:
         sql = "SELECT posts.*, blog_users.username FROM posts JOIN blog_users ON posts.user_id = blog_users.id ORDER BY created_at DESC"
         cursor.execute(sql)
@@ -101,9 +110,11 @@ def profile():
         return redirect('/login')
     
     user_id = session['user_id']
-    cursor = db.cursor(dictionary=True)
+    
+    db = get_db()
+    cursor = db.cursor()    
     try:
-        sql = "SELECT * FROM posts WHERE user_id = %s ORDER BY created_at DESC"
+        sql = "SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC"
         cursor.execute(sql, (user_id,))
         user_posts = cursor.fetchall()
     finally:
@@ -125,9 +136,10 @@ def publish():
         content = request.form['content']
         user_id = session['user_id']
         
-        cursor = db.cursor(dictionary=True)
+        db = get_db()
+        cursor = db.cursor()
         try:
-            sql = "INSERT INTO posts (user_id, title, content) VALUES (%s, %s, %s)"
+            sql = "INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)"
             cursor.execute(sql, (user_id, title, content))
             db.commit()
         finally:
@@ -145,9 +157,10 @@ def delete_post():
     post_id = request.form['post_id']
     user_id = session['user_id']
 
+    db = get_db()
     cursor = db.cursor()
     try:
-        sql = "DELETE FROM posts WHERE id = %s AND user_id = %s"
+        sql = "DELETE FROM posts WHERE id = ? AND user_id = ?"
         cursor.execute(sql, (post_id, user_id))
         db.commit()
     finally:
@@ -159,9 +172,10 @@ def delete_post():
 def search_users():
     query = request.args.get('query', '').strip()
 
-    cursor = db.cursor(dictionary=True)
+    db = get_db()
+    cursor = db.cursor()
     try:
-        sql = "SELECT id, username FROM blog_users WHERE username LIKE %s"
+        sql = "SELECT id, username FROM blog_users WHERE username LIKE ?"
         cursor.execute(sql, (f'%{query}%',))
         results = cursor.fetchall()
     finally:
@@ -171,9 +185,10 @@ def search_users():
 
 @app.route('/user/<username>')
 def user_profile(username):
-    cursor = db.cursor(dictionary=True)
+    db = get_db()
+    cursor = db.cursor()
     try:
-        sql = "SELECT * FROM posts JOIN blog_users ON posts.user_id = blog_users.id WHERE blog_users.username = %s ORDER BY posts.created_at DESC"
+        sql = "SELECT * FROM posts JOIN blog_users ON posts.user_id = blog_users.id WHERE blog_users.username = ? ORDER BY posts.created_at DESC"
         cursor.execute(sql, (username,))
         user_posts = cursor.fetchall()
     finally:
