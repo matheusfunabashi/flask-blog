@@ -9,6 +9,15 @@
 <body id="signup-page" class="d-flex justify-content-center align-items-center vh-100">
     <div class="text-center rounded bg-light p-4">
         <h1>Sign Up</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <form method="POST" action="/signup">
             <input type="text" name="email" placeholder="Email" required><br><br>
             <input type="text" name="uname" placeholder="Username" required><br><br>

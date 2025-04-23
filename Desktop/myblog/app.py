@@ -1,5 +1,6 @@
-from flask import Flask, request, render_template, redirect, url_for, session, g
+from flask import Flask, request, render_template, redirect, url_for, session, g, flash
 import sqlite3
+from email_validator import validate_email, EmailNotValidError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
@@ -67,7 +68,14 @@ def signup():
         email = request.form['email']
         uname = request.form['uname']
         password = request.form['passw']
-
+        try:
+            # This will raise EmailNotValidError if invalid
+            valid = validate_email(email)
+            email = valid.email  # replace with normalized email
+        except EmailNotValidError as e:
+            flash("Invalid Email", 'danger')
+            return redirect(url_for('signup'))
+        
         hashed_password = generate_password_hash(password)
 
         db = get_db()
