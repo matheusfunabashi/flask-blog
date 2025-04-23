@@ -56,10 +56,10 @@ DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 DB_NAME=login_demo
 
-#  🏁 Start the app:
+# 🏁 Start the app:
 
 python app.py
 
-#👨🏾‍💻 Author
+# 👨🏾‍💻 Author
 
 Matheus Funabashi 💙
