@@ -45,3 +45,17 @@ Clone the repo and install dependencies:
 git clone https://github.com/matheusfunabashi/flask-blog.git
 cd flask-blog
 pip install -r requirements.txt
+```
+
+Create a .env file in the root folder with your credentials:
+
+FLASK_SECRET_KEY=your_secret_key
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=login_demo
+
+Start the app:
+
+python app.py
