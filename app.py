@@ -14,7 +14,7 @@ DATABASE = 'blog.db'
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row  # So you can access columns by name
+        g.db.row_factory = sqlite3.Row 
     return g.db
 
 @app.teardown_appcontext
@@ -69,9 +69,8 @@ def signup():
         uname = request.form['uname']
         password = request.form['passw']
         try:
-            # This will raise EmailNotValidError if invalid
             valid = validate_email(email)
-            email = valid.email  # replace with normalized email
+            email = valid.email 
         except EmailNotValidError as e:
             flash("Invalid Email", 'danger')
             return redirect(url_for('signup'))
